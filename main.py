@@ -1,8 +1,8 @@
 """
 Course 55812 - Data analysis for decision making - Ex2
 Authors:
-    Omer Arie Lerinman, 304919863
-    Liat Meir, 305677817
+    Omer Arie Lerinman
+    Liat Meir
 Date 25/10/2021
 """
 # ============================================== Imports =================================================
@@ -57,7 +57,6 @@ def print_q(question_num: int) -> None:
 def print_section(section_name: str) -> None:
     """Print the section number"""
     print(f"\n < section {section_name} > ")
-
 
 
 def print_standard_error(X: pd.DataFrame, y_true: pd.DataFrame, y_pred: pd.DataFrame, X_names: list):
@@ -305,7 +304,7 @@ def second_question(data: pd.DataFrame) -> None:
 
 
 if __name__ == '__main__':
-    print('55812 Data analysis for decision making\nEx2\nLiat Meir (305677817) & Omer Arie Lerinman (304919863)\n\n')
+    print('55812 Data analysis for decision making\nEx2\nLiat Meir, Omer Arie Lerinman & Gil \n\n') 
     data = load_data()
     first_question(data)
     second_question(data)
