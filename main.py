@@ -3,6 +3,7 @@ Course 55812 - Data analysis for decision making - Ex2
 Authors:
     Omer Arie Lerinman
     Liat Meir
+    Gil Avraham
 Date 25/10/2021
 """
 # ============================================== Imports =================================================
@@ -21,6 +22,7 @@ from linearmodels.iv.model import IV2SLS
 from linearmodels.iv import compare
 import pingouin as pg
 from sklearn.feature_selection import f_regression
+
 # ============================================== Constants ==============================================
 
 
@@ -34,19 +36,19 @@ CUR_DIR = Path(__file__).parent.resolve()
 def regression_results(y_true, y_pred):
 
     # Regression metrics
-    explained_variance=metrics.explained_variance_score(y_true, y_pred)
-    mean_absolute_error=metrics.mean_absolute_error(y_true, y_pred)
-    mse=metrics.mean_squared_error(y_true, y_pred)
-    mean_squared_log_error=metrics.mean_squared_log_error(y_true, y_pred)
-    r2=metrics.r2_score(y_true, y_pred)
+    explained_variance = metrics.explained_variance_score(y_true, y_pred)
+    mean_absolute_error = metrics.mean_absolute_error(y_true, y_pred)
+    mse = metrics.mean_squared_error(y_true, y_pred)
+    mean_squared_log_error = metrics.mean_squared_log_error(y_true, y_pred)
+    r2 = metrics.r2_score(y_true, y_pred)
 
-    print('explained_variance: ', round(explained_variance,4))
-    print('mean_squared_log_error: ', round(mean_squared_log_error,4))
-    print('r2: ', round(r2,4))
-    print('MAE: ', round(mean_absolute_error,4))
-    #print(f'MSR: {msr:.5f}')
+    print('explained_variance: ', round(explained_variance, 4))
+    print('mean_squared_log_error: ', round(mean_squared_log_error, 4))
+    print('r2: ', round(r2, 4))
+    print('MAE: ', round(mean_absolute_error, 4))
+    # print(f'MSR: {msr:.5f}')
     print(f'MSE: {mse:.5f}')
-    print('RMSE: ', round(np.sqrt(mse),4))
+    print('RMSE: ', round(np.sqrt(mse), 4))
 
 
 def print_q(question_num: int) -> None:
@@ -69,7 +71,7 @@ def print_standard_error(X: pd.DataFrame, y_true: pd.DataFrame, y_pred: pd.DataF
     X_with_intercept[:, 0] = 1
     X_with_intercept[:, 1:p] = X.values
     residuals = y_true - y_pred
-    ssr = residuals.T @ residuals  #  residual_sum_of_squares
+    ssr = residuals.T @ residuals  # residual_sum_of_squares
     sigma_squared_hat = ssr / (N - p)
     var_beta_hat = np.linalg.inv(X_with_intercept.T @ X_with_intercept) * sigma_squared_hat
     for i in range(p):
@@ -81,7 +83,7 @@ def print_standard_error(X: pd.DataFrame, y_true: pd.DataFrame, y_pred: pd.DataF
 
 
 def run_regression(data: pd.DataFrame, y_column_name: str, x_columns_names: list, x_func: list = None,
-                   y_func=None, verbose: bool=True, plot: bool=False) -> LinearRegression:
+                   y_func=None, verbose: bool = True, plot: bool = False) -> LinearRegression:
     """
     Calculate and return the results of a regression.
     :param data: input data as a pd.Dataframe
@@ -109,8 +111,8 @@ def run_regression(data: pd.DataFrame, y_column_name: str, x_columns_names: list
     if verbose:
         beta_str = '\u03B2'
         x_func_as_list = x_func if x_func is not None else [None for _ in range(len(x_columns_names))]
-        functions = [f'{beta_str}{str(x_f)}({i+1}{x_name})' if x_f is not None else f'{beta_str}{i+1}{x_name}'
-                     for i,(x_f, x_name) in enumerate(zip(x_func_as_list, x_columns_names))]
+        functions = [f'{beta_str}{str(x_f)}({i + 1}{x_name})' if x_f is not None else f'{beta_str}{i + 1}{x_name}'
+                     for i, (x_f, x_name) in enumerate(zip(x_func_as_list, x_columns_names))]
         right_hand_side = ' + '.join([f'{beta_str}0'] + functions)
         if y_func == np.log:
             left_hand_side = f'log({y_column_name})'
@@ -118,22 +120,28 @@ def run_regression(data: pd.DataFrame, y_column_name: str, x_columns_names: list
             left_hand_side = f'{y_func}({y_column_name})' if y_func is not None else f'{y_column_name}'
         print(f'{left_hand_side} = {right_hand_side}')
         functions = [f'{model.coef_[i]:.5f}{str(x_f)}({x_name})' if x_f is not None else f'{model.coef_[i]:.5f}{x_name}'
-                     for i,(x_f, x_name) in enumerate(zip(x_func_as_list, x_columns_names))]
+                     for i, (x_f, x_name) in enumerate(zip(x_func_as_list, x_columns_names))]
         right_hand_side = ' + '.join([f'{slope:.4f}'] + functions)
         print(f'{left_hand_side} = {right_hand_side}')
-        if plot and len(x_columns_names)==1:
+        if plot and len(x_columns_names) == 1:
             plt.title(f'{y_column_name} as a function of {",".join(x_columns_names)}')
-            ax = plt.scatter(x, np.reshape(y, newshape=(-1,1)), label=y_column_name).axes
+            ax = plt.scatter(x, np.reshape(y, newshape=(-1, 1)), label=y_column_name).axes
 
             ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
             plt.plot(x, Y_pred, color='red')
-            plt.xlabel(x_columns_names[0] if len(x_columns_names)==1 else '')
+            plt.xlabel(x_columns_names[0] if len(x_columns_names) == 1 else '')
             plt.ylabel(y_column_name)
             plt.grid()
             plt.legend(loc='lower right')
             plt.show()
     return model
 
+
+def print_cov_table(headers, covAnswers) -> None:
+    rowFormat = "{:<12}" * (len(headers) + 1)
+    print(rowFormat.format("", *headers))
+    for team, row in zip(headers, np.around(covAnswers, 5)):
+        print(rowFormat.format(team, *row))
 
 # ============================================== Answers' implementation ===============================
 
@@ -167,14 +175,17 @@ def first_question(data: pd.DataFrame) -> None:
     alpha_2 = model_2.coef_[1]
     IQ = data['IQ'].to_numpy()
     education = data['educ'].to_numpy()
-    beta_1_est = alpha_1 + (alpha_0 + alpha_2*IQ - beta_0) / education
-    plt.hist(beta_1_est, bins='auto', color='c', edgecolor='k') # arguments are passed to np.histogram
+    beta_1_est = alpha_1 + (alpha_0 + alpha_2 * IQ - beta_0) / education
+    plt.hist(beta_1_est, bins='auto', color='c', edgecolor='k')  # arguments are passed to np.histogram
     plt.axvline(beta_1_est.mean(), color='k', linestyle='dashed', linewidth=1)
     average = beta_1_est.mean()
     plt.title(f"Histogram of beta_1 estimation by the data (av={average})")
     frame1 = plt.gca()
     frame1.axes.yaxis.set_ticklabels([])
     plt.show()
+    print_section('3')
+    pie12 = np.cov(IQ, education)
+    print_cov_table(['IQ', 'Education'], pie12)
 
 
 def run_OLS(data: pd.DataFrame, y_column_name: str, x_columns_names: list, add_constant: bool = True,
@@ -214,7 +225,7 @@ def is_significant(beta_hat: float, beta_hat_std: float, p_value: float = 1.96) 
     :param p_value: P value, default=1.96 (5%)
     :return: boolean indicator
     """
-    return abs(beta_hat/beta_hat_std) > p_value
+    return abs(beta_hat / beta_hat_std) > p_value
 
 
 def get_confidence_interval(earning_tall: pd.DataFrame, earning_short: pd.DataFrame,
@@ -235,7 +246,7 @@ def get_confidence_interval(earning_tall: pd.DataFrame, earning_short: pd.DataFr
     var_short = np.std(earning_short) ** 2
     dif = average_tall - average_short
     std_factor = normal_curve_area * np.sqrt(((((n_tall-1)*var_tall) + (n_short-1)*var_short)/(n_tall + n_short - 2)) *
-                                             ((n_tall + n_short) / (n_tall*n_short)))
+        ((n_tall + n_short) / (n_tall * n_short)))
     return dif - std_factor, dif + std_factor
 
 
@@ -252,7 +263,7 @@ def second_question(data: pd.DataFrame) -> None:
     print_section('a')
     # as a reference -
     run_regression(y_column_name='wage', x_columns_names=['educ', 'exper', 'tenure', 'black'],
-                                    data=data, y_func=np.log)
+                   data=data, y_func=np.log)
     iv_2sls_model = IV2SLS.from_formula("np.log(wage) ~ 1 + exper + tenure + black + [educ ~ sibs]", data).fit()
     print(compare({"2SLS": iv_2sls_model}))
     print(iv_2sls_model)
@@ -260,7 +271,7 @@ def second_question(data: pd.DataFrame) -> None:
     # reference check, slightly different results
     data['const_tmp'] = 1
     iv_2sls_model_unadjusted = IV2SLS(np.log(data.wage), data[["const_tmp", "exper", "tenure", "black"]], data.educ,
-                               data.sibs).fit(cov_type="unadjusted")
+                                      data.sibs).fit(cov_type="unadjusted")
     print(iv_2sls_model_unadjusted)
 
 
@@ -271,7 +282,7 @@ def second_question(data: pd.DataFrame) -> None:
     educ_hat = educ_reg_model.predict(X=data[['sibs', 'exper', 'tenure', 'black']])
     data['educ_hat'] = educ_hat
     x_variables = ['educ_hat', 'exper', 'tenure', 'black']
-    wage_reg_model = run_regression(y_column_name='wage', x_columns_names=x_variables,data=data, y_func=np.log)
+    wage_reg_model = run_regression(y_column_name='wage', x_columns_names=x_variables, data=data, y_func=np.log)
     wage_true = np.log(data['wage'])
     X = data[x_variables]
     wage_pred = wage_reg_model.predict(X)
@@ -288,7 +299,7 @@ def second_question(data: pd.DataFrame) -> None:
     print_section('d')
     print("\twhen conducting an F-statistic test on sibs:")
     print("\t\tOn all of the data - ")
-    ret_val = f_regression(X=data[['sibs','exper','tenure','black']], y=data['educ'])
+    ret_val = f_regression(X=data[['sibs', 'exper', 'tenure', 'black']], y=data['educ'])
     print(f'\t\t\tF(1,{len(data)}) ={ret_val[0][0]:.6f}')
     print(f'\t\t\tProb > F = {ret_val[1][0]:.8f}')
     print("\t\tOn the black people data only - ")
@@ -304,9 +315,8 @@ def second_question(data: pd.DataFrame) -> None:
 
 
 if __name__ == '__main__':
-    print('55812 Data analysis for decision making\nEx2\nLiat Meir, Omer Arie Lerinman & Gil \n\n') 
+    print('55812 Data analysis for decision making\nEx2\nLiat Meir, Omer Arie Lerinman & Gil Avraham \n\n')
     data = load_data()
     first_question(data)
     second_question(data)
     print('Done.')
-
