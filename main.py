@@ -16,11 +16,11 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import statsmodels.api as sm
 from statsmodels.regression.linear_model import RegressionResults
+import statsmodels.formula.api as smf
 from sklearn.linear_model import LinearRegression
 import sklearn.metrics as metrics
 from linearmodels.iv.model import IV2SLS
 from linearmodels.iv import compare
-import pingouin as pg
 from sklearn.feature_selection import f_regression
 
 # ============================================== Constants ==============================================
@@ -298,15 +298,20 @@ def second_question(data: pd.DataFrame) -> None:
     print(black_iv_2sls_model._f_statistic)
 
     print_section('d')
-    print("\twhen conducting an F-statistic test on sibs:")
-    print("\t\tOn all of the data - ")
-    ret_val = f_regression(X=data[['sibs', 'exper', 'tenure', 'black']], y=data['educ'])
-    print(f'\t\t\tF(1,{len(data)}) ={ret_val[0][0]:.6f}')
-    print(f'\t\t\tProb > F = {ret_val[1][0]:.8f}')
-    print("\t\tOn the black people data only - ")
-    black_data_ret_val = f_regression(X=black_data[['sibs', 'exper', 'tenure']], y=black_data['educ'])
-    print(f'\t\t\tF(1,{len(black_data)}) ={black_data_ret_val[0][0]:.6f}')
-    print(f'\t\t\tProb > F = {black_data_ret_val[1][0]:.8f}')
+
+    results = smf.ols('educ ~ sibs + exper + tenure + black', data).fit()
+    print(results.summary())
+    wald_results = results.wald_test('sibs = 0')
+    print("\t\tWald test on the black people data only - ")
+    print(f'\t\t\tF({wald_results.df_num:.0f},{wald_results.df_denom:.0f}) = {wald_results.fvalue[0][0]:.4f}')
+    print(f'\t\t\tProb > F = {wald_results.pvalue:.5f}')
+
+    black_results = smf.ols('educ ~ sibs + exper + tenure + black', black_data).fit()
+    print(black_results.summary())
+    black_wald = black_results.wald_test('sibs = 0')
+    print("\t\tWald test on the black people data only - ")
+    print(f'\t\t\tF({black_wald.df_num:.0f},{black_wald.df_denom:.0f}) = {black_wald.fvalue[0][0]:.4f}')
+    print(f'\t\t\tProb > F = {black_wald.pvalue:.5f}')
 
     print_section('e')
     non_black_data = data[data['black'] == 0]
