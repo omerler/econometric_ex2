@@ -302,14 +302,14 @@ def second_question(data: pd.DataFrame) -> None:
     results = smf.ols('educ ~ sibs + exper + tenure + black', data).fit()
     print(results.summary())
     wald_results = results.wald_test('sibs = 0')
-    print("\t\tWald test on the black people data only - ")
+    print("\t\tWald test on the whole data:")
     print(f'\t\t\tF({wald_results.df_num:.0f},{wald_results.df_denom:.0f}) = {wald_results.fvalue[0][0]:.4f}')
     print(f'\t\t\tProb > F = {wald_results.pvalue:.5f}')
 
     black_results = smf.ols('educ ~ sibs + exper + tenure + black', black_data).fit()
     print(black_results.summary())
     black_wald = black_results.wald_test('sibs = 0')
-    print("\t\tWald test on the black people data only - ")
+    print("\t\tWald test on the black people data only:")
     print(f'\t\t\tF({black_wald.df_num:.0f},{black_wald.df_denom:.0f}) = {black_wald.fvalue[0][0]:.4f}')
     print(f'\t\t\tProb > F = {black_wald.pvalue:.5f}')
 
