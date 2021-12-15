@@ -81,7 +81,7 @@ def print_standard_error(X: pd.DataFrame, y_true: pd.DataFrame, y_pred: pd.DataF
 
 
 def run_regression(data: pd.DataFrame, y_column_name: str, x_columns_names: list, x_func: list = None,
-                   y_func=None, verbose: bool=True, plot: bool=False) -> LinearRegression:
+                   y_func=None, verbose: bool=True, plot: bool=True) -> LinearRegression:
     """
     Calculate and return the results of a regression.
     :param data: input data as a pd.Dataframe
@@ -122,13 +122,14 @@ def run_regression(data: pd.DataFrame, y_column_name: str, x_columns_names: list
         right_hand_side = ' + '.join([f'{slope:.4f}'] + functions)
         print(f'{left_hand_side} = {right_hand_side}')
         if plot and len(x_columns_names)==1:
-            plt.title(f'{y_column_name} as a function of {",".join(x_columns_names)}')
+            plt.title(f'{left_hand_side} as a function of {",".join(x_columns_names)}')
             ax = plt.scatter(x, np.reshape(y, newshape=(-1,1)), label=y_column_name).axes
 
             ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
+            #plt.yscale('log')
             plt.plot(x, Y_pred, color='red')
             plt.xlabel(x_columns_names[0] if len(x_columns_names)==1 else '')
-            plt.ylabel(y_column_name)
+            plt.ylabel(left_hand_side)
             plt.grid()
             plt.legend(loc='lower right')
             plt.show()
@@ -171,9 +172,10 @@ def first_question(data: pd.DataFrame) -> None:
     plt.hist(beta_1_est, bins='auto', color='c', edgecolor='k') # arguments are passed to np.histogram
     plt.axvline(beta_1_est.mean(), color='k', linestyle='dashed', linewidth=1)
     average = beta_1_est.mean()
-    plt.title(f"Histogram of beta_1 estimation by the data (av={average})")
+    plt.title(f"Histogram of beta_1 estimation by the data (av={average:.4f})")
     frame1 = plt.gca()
     frame1.axes.yaxis.set_ticklabels([])
+    plt.grid()
     plt.show()
 
 
@@ -304,7 +306,7 @@ def second_question(data: pd.DataFrame) -> None:
 
 
 if __name__ == '__main__':
-    print('55812 Data analysis for decision making\nEx2\nLiat Meir, Omer Arie Lerinman & Gil \n\n') 
+    print('55812 Data analysis for decision making\nEx2\nLiat Meir, Omer Arie Lerinman & Gil \n\n')
     data = load_data()
     first_question(data)
     second_question(data)
